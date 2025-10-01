@@ -1,0 +1,60 @@
+-- Raw event storage (detailed)
+CREATE TABLE urls (
+  id BIGSERIAL PRIMARY KEY,
+  short_id VARCHAR(10) UNIQUE NOT NULL,
+  target_url TEXT NOT NULL,
+  created_at TIMESTAMP DEFAULT NOW()
+);
+
+CREATE TABLE url_analytics_events (
+  id SERIAL PRIMARY KEY,
+  short_id VARCHAR(10) REFERENCES urls(short_id),
+  timestamp TIMESTAMP NOT NULL,
+  ip VARCHAR(45),
+  referrer TEXT,
+  user_agent TEXT,
+  country VARCHAR(50),
+  city VARCHAR(50)
+);
+
+-- Aggregated counters (for fast queries)
+CREATE TABLE url_analytics_daily (
+  id SERIAL PRIMARY KEY,
+  short_id VARCHAR(10) REFERENCES urls(short_id),
+  date DATE NOT NULL,
+  hour INT,
+  clicks INT DEFAULT 0,
+  UNIQUE(short_id, date, hour)
+);
+
+CREATE TABLE url_performance (
+  id SERIAL PRIMARY KEY,
+  short_id VARCHAR(10) REFERENCES urls(short_id),
+  timestamp TIMESTAMP NOT NULL,
+  cache_hit BOOLEAN NOT NULL,           -- Was this served from Redis cache?
+  redirect_latency_ms INT NOT NULL,     -- Time in milliseconds for redirect
+  failed_redirect BOOLEAN NOT NULL      -- True if redirect failed (404/500)
+);
+
+CREATE TABLE url_security_events (
+  id SERIAL PRIMARY KEY,
+  short_id VARCHAR(10) REFERENCES urls(short_id),
+  timestamp TIMESTAMP NOT NULL,
+  ip VARCHAR(45),
+  rate_limit_exceeded BOOLEAN DEFAULT FALSE,  -- True if request blocked
+  suspicious_activity BOOLEAN DEFAULT FALSE,  -- Bots, spam, or unusual patterns
+  malformed_request BOOLEAN DEFAULT FALSE,    -- Invalid URL/payload
+  user_agent TEXT,
+  referrer TEXT
+);
+
+
+
+apis
+curl -I http://localhost:3000/GQUFowo
+curl -s http://localhost:3000/analytics/GQUFowo/total
+curl -s http://localhost:3000/analytics/GQUFowo/daily
+curl -s http://localhost:3000/analytics/GQUFowo/events
+curl -s http://localhost:3000/analytics/GQUFowo/countries
+curl -s http://localhost:3000/analytics/GQUFowo/performance
+curl -s http://localhost:3000/analytics/GQUFowo/security

@@ -4,8 +4,11 @@
     "dotenv": "^17.2.2",
     "express": "^5.1.0",
     "express-rate-limit": "^6.7.0",
+    "geoip-lite": "^1.4.10",
+    "nodemon": "^3.1.10",
     "rate-limit-redis": "^2.0.0",
     "redis": "^5.8.2",
-    "supabase": "^2.45.5"
+    "supabase": "^2.45.5",
+    "ua-parser-js": "^2.0.5"
   }
 }
